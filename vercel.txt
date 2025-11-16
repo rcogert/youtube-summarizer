@@ -1,0 +1,11 @@
+vercel
+URL: Production: https://youtube-summarizer-pbmq0rj1c-robyn-cogerts-projects.vercel.app [2s]
+📝  Deployed to production. Run `vercel --prod` to overwrite later (https://vercel.link/2F).
+💡  To change the domain or build command, go to https://vercel.com/robyn-cogerts-projects/youtube-summarizer/settings
+
+API key
+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
+
+
+to test api curl command
+curl -X POST "https://youtube-summarizer-pbmq0rj1c-robyn-cogerts-projects.vercel.app/api/summarize" -H "Content-Type: application/json" -d "{\"videoId\": \"c_n-5_L2T-Y\"}"

@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "name": "youtube-summarizer",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@netlify/functions": "^2.0.0",
+    "openai": "^4.0.0",
+    "youtube-transcript-api": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^20.11.0"
+  }
+}

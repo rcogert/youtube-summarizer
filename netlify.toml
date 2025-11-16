@@ -1,0 +1,6 @@
+[functions]
+directory = "dist/functions"
+node_bundler = "none"
+
+[functions.summarize]
+timeout = 26
