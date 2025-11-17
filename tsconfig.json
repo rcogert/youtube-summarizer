@@ -3,15 +3,12 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["es2022", "dom"],
+    "outDir": "dist",
+    "rootDir": ".",
+    "lib": ["ES2022"],
     "strict": true,
     "esModuleInterop": true,
-    "outDir": "dist",
-    "rootDir": "."
+    "skipLibCheck": true
   },
-  "include": [
-    "functions/**/*.ts",
-    "types/**/*.d.ts"
-  ]
+  "include": ["functions/**/*.ts", "types/**/*.d.ts"]
 }
-
