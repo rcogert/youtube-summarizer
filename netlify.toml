@@ -9,3 +9,4 @@ external_node_modules = ["openai", "youtube-transcript-api"]
 
 [functions.summarize]
 timeout = 26
+
