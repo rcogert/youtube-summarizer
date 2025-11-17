@@ -4,14 +4,15 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "postbuild": "copy functions\\package.json dist\\functions\\package.json"
+    "postbuild": "node -e \"process.platform==='win32'?process.exit(1):process.exit(0)\" || npm run copy-win || sh netlify-copy.sh",
+    "copy-win": "mkdir dist\\functions 2> NUL & copy functions\\package.json dist\\functions\\package.json > NUL"
   },
   "dependencies": {
-    "@netlify/functions": "^5.1.0",
     "openai": "^4.0.0",
     "youtube-transcript-api": "^1.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@netlify/functions": "^2.4.1"
   }
 }
