@@ -1,16 +1,15 @@
 // functions/summarize.ts
 
-import type { Handler, HandlerEvent, HandlerContext } from "@netlify/functions";
+import type { Handler } from "@netlify/functions";
+
 import { OpenAI } from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const handler: Handler = async (
-  event: HandlerEvent,
-  context: HandlerContext
-) => {
+export const handler: Handler = async (event, context) => {
+
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }

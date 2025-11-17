@@ -7,7 +7,11 @@
     "postbuild": "copy functions\\package.json dist\\functions\\package.json"
   },
   "dependencies": {
+    "@netlify/functions": "^5.1.0",
     "openai": "^4.0.0",
     "youtube-transcript-api": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }
