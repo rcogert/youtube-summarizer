@@ -2,11 +2,16 @@
   "name": "youtube-summarizer",
   "version": "1.0.0",
   "type": "module",
-"scripts": {
-  "build": "",
-  "postbuild": ""
-},
+  "scripts": {
+    "build": "tsc",
+    "postbuild": "node copy-func-package.cjs"
+  },
+  "dependencies": {
+    "openai": "^4.0.0",
+    "youtube-transcript-api": "^1.0.0"
+  },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@types/node": "^22.7.5"
   }
 }
