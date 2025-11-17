@@ -1,18 +1,12 @@
 {
-  "type": "module",
   "name": "youtube-summarizer",
   "version": "1.0.0",
-  "scripts": {
-    "build": "tsc",
-    "postbuild": "node -e \"process.platform==='win32'?process.exit(1):process.exit(0)\" || npm run copy-win || sh netlify-copy.sh",
-    "copy-win": "mkdir dist\\functions 2> NUL & copy functions\\package.json dist\\functions\\package.json > NUL"
-  },
-  "dependencies": {
-    "openai": "^4.0.0",
-    "youtube-transcript-api": "^1.0.0"
-  },
+  "type": "module",
+"scripts": {
+  "build": "tsc",
+  "postbuild": "node copy-func-package.cjs"
+},
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "@netlify/functions": "^2.4.1"
+    "typescript": "^5.9.3"
   }
 }
