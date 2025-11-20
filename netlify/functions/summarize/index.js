@@ -10,7 +10,7 @@ const { JSDOM } = require('jsdom'); // This is needed because 'youtube-transcrip
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "YOUR_OPENAI_API_KEY_HERE";
 
 // Initialize OpenAI client
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: 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 });
 
 // Define all necessary CORS headers once
 const HEADERS = {

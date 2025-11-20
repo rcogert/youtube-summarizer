@@ -1,159 +1,145 @@
-// contentScript.js
-
-console.log("YouTube TLDR Summarizer content script loaded.");
+// ==========================================================
+// YOUTUBE TLDR SUMMARIZER - CONTENT SCRIPT
+// V14: Targeted Fix and Debugging (400 Error)
+// ==========================================================
 
 const API_URL = "https://brilliant-moonbeam-e70394.netlify.app/.netlify/functions/summarize";
+const BUTTON_CLASS = "tldr-summarizer-button";
+const VIDEO_LINK_SELECTOR = 'a[href*="/watch?v="]';
 
-// Watch for dynamic YouTube DOM changes
-const observer = new MutationObserver(() => {
-  attachToThumbnails();
-  attachToMainVideo();
-});
+// --- UI AND DISPLAY ---
 
-observer.observe(document.body, { childList: true, subtree: true });
-
-
-// ------------------------------------------------------
-// 1. Attach TLDR button to thumbnails (homepage / search)
-// ------------------------------------------------------
-function attachToThumbnails() {
-  const thumbnails = document.querySelectorAll("a.yt-lockup-view-model__content-image");
-
-  thumbnails.forEach((thumb) => {
-    if (thumb.dataset.tldrInjected) return;
-
-    thumb.style.position = "relative";
-
-    const btn = createHoverButton();
-
-    thumb.addEventListener("mouseenter", () => (btn.style.opacity = "1"));
-    thumb.addEventListener("mouseleave", () => (btn.style.opacity = "0"));
-
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      sendForSummary(thumb.href);
-    });
-
-    thumb.appendChild(btn);
-    thumb.dataset.tldrInjected = "true";
-  });
+function showSummaryPopup(summary) {
+    alert("Summary:\n\n" + summary);
 }
 
-
-// ------------------------------------------------------
-// 2. Attach TLDR button to the main video page
-// ------------------------------------------------------
-function attachToMainVideo() {
-  const titleEl = document.querySelector("ytd-watch-metadata yt-formatted-string.style-scope.ytd-watch-metadata");
-
-  if (!titleEl) return;
-  if (titleEl.dataset.tldrInjected) return;
-
-  const btn = document.createElement("button");
-  btn.textContent = "TLDR";
-  btn.style.marginLeft = "12px";
-  btn.style.padding = "6px 10px";
-  btn.style.background = "#000000cc";
-  btn.style.color = "white";
-  btn.style.border = "none";
-  btn.style.borderRadius = "4px";
-  btn.style.cursor = "pointer";
-
-  btn.addEventListener("click", () => {
-    const url = window.location.href;
-    sendForSummary(url);
-  });
-
-  titleEl.after(btn);
-  titleEl.dataset.tldrInjected = "true";
+function createButton(url) {
+    const button = document.createElement('button');
+    button.className = BUTTON_CLASS;
+    button.textContent = 'TLDR';
+    button.style.cssText = `
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #CC0000;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        z-index: 1000;
+        border-radius: 4px;
+        display: none;
+        pointer-events: all;
+    `;
+    button.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        sendForSummary(url); 
+    };
+    return button;
 }
 
+function injectButton(container, videoId, isMainPlayer = false) {
+    if (container.querySelector(`.${BUTTON_CLASS}`)) {
+        return;
+    }
 
-// ------------------------------------------------------
-// 3. Button used on thumbnails (hover fade-in)
-// ------------------------------------------------------
-function createHoverButton() {
-  const btn = document.createElement("div");
+    const url = `https://www.youtube.com/watch?v=${videoId}`;
+    const button = createButton(url);
+    
+    container.style.position = 'relative'; 
+    
+    if (isMainPlayer) {
+        button.style.display = 'block'; 
+        button.style.top = '10px';
+        button.style.right = '10px';
+    }
 
-  btn.textContent = "TLDR";
-  btn.style.position = "absolute";
-  btn.style.top = "6px";
-  btn.style.right = "6px";
-  btn.style.padding = "3px 6px";
-  btn.style.background = "rgba(0,0,0,0.55)";
-  btn.style.color = "white";
-  btn.style.fontSize = "10px";
-  btn.style.borderRadius = "3px";
-  btn.style.cursor = "pointer";
-  btn.style.opacity = "0";
-  btn.style.transition = "opacity 0.2s ease-in-out";
-  btn.style.zIndex = "9999";
+    container.appendChild(button);
 
-  return btn;
+    if (!isMainPlayer) {
+        container.addEventListener('mouseenter', () => { 
+            button.style.display = 'block'; 
+        });
+        container.addEventListener('mouseleave', () => { 
+            button.style.display = 'none'; 
+        });
+    }
 }
 
-
 // ------------------------------------------------------
-// 4. Communicate with your Netlify summarizer
+// 2. NETWORK COMMUNICATION (DEBUGGING 400)
 // ------------------------------------------------------
 function sendForSummary(url) {
-  console.log("Summarizing:", url);
+  // *** DEBUG LINE ADDED HERE ***
+  console.log("URL being sent to Netlify:", url); 
 
   fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ videoUrl: url }),
   })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.summary) showSummaryPopup(data.summary);
-      else alert("No summary returned.");
+    .then((res) => {
+        if (!res.ok) {
+            console.error("API Fetch Failed with Status:", res.status, res.statusText);
+            throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
     })
-    .catch((err) => alert("Error: " + err.message));
+    .then((data) => {
+      if (data.summary) {
+          showSummaryPopup(data.summary); 
+      }
+      else if (data.error) {
+          alert("Summary Error: " + data.error);
+      }
+      else {
+          alert("No summary returned.");
+      }
+    })
+    .catch((err) => {
+        console.error("Fetch/API Error:", err);
+        alert("Error: Failed to fetch summary. Check the console for network details.");
+    });
 }
 
 
 // ------------------------------------------------------
-// 5. Summary popup modal
+// 3. INJECTION LOGIC
 // ------------------------------------------------------
-function showSummaryPopup(text) {
-  const overlay = document.createElement("div");
-  overlay.style.position = "fixed";
-  overlay.style.top = 0;
-  overlay.style.left = 0;
-  overlay.style.width = "100vw";
-  overlay.style.height = "100vh";
-  overlay.style.background = "rgba(0,0,0,0.6)";
-  overlay.style.zIndex = 999999;
-  overlay.style.display = "flex";
-  overlay.style.alignItems = "center";
-  overlay.style.justifyContent = "center";
 
-  const box = document.createElement("div");
-  box.style.background = "white";
-  box.style.padding = "20px";
-  box.style.borderRadius = "8px";
-  box.style.maxWidth = "600px";
-  box.style.maxHeight = "70vh";
-  box.style.overflowY = "auto";
-  box.style.fontSize = "14px";
-  box.style.lineHeight = "1.4";
+function processVideoElements() {
+    // A. Handle Main Video Player (Re-enabling with robust wrapper)
+    const mainPlayer = document.querySelector('#movie_player');
+    const mainPlayerWrapper = mainPlayer ? mainPlayer.closest('ytd-watch-flexy') : null; 
 
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "Close";
-  closeBtn.style.marginTop = "10px";
-  closeBtn.style.padding = "6px 12px";
-  closeBtn.style.background = "#000000cc";
-  closeBtn.style.color = "white";
-  closeBtn.style.border = "none";
-  closeBtn.style.borderRadius = "4px";
-  closeBtn.style.cursor = "pointer";
+    if (mainPlayerWrapper && window.location.href.includes('/watch')) {
+        const currentVideoId = new URLSearchParams(window.location.search).get('v');
+        if (currentVideoId && !mainPlayerWrapper.querySelector(`.${BUTTON_CLASS}`)) {
+            injectButton(mainPlayerWrapper, currentVideoId, true);
+        }
+    }
 
-  closeBtn.addEventListener("click", () => document.body.removeChild(overlay));
+    // B. Handle all Thumbnails 
+    const videoLinks = document.querySelectorAll(VIDEO_LINK_SELECTOR);
+    
+    videoLinks.forEach(link => {
+        // Find the closest component wrapper
+        const container = link.closest('ytd-rich-grid-media') || link.closest('ytd-compact-video-renderer'); 
+        
+        const finalContainer = container || link.parentElement; 
 
-  box.innerHTML = `<strong>Summary</strong><br><br>${text}`;
-  box.appendChild(closeBtn);
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
+        if (finalContainer) {
+            const urlParams = new URLSearchParams(link.search);
+            const videoId = urlParams.get('v');
+            if (videoId) {
+                // Ensure we use the full URL path, not just the ID, for reliable backend parsing
+                const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                injectButton(finalContainer, videoId, false);
+            }
+        }
+    });
 }
+
+// Start the reliable scan loop every 500 milliseconds (0.5 seconds)
+setInterval(processVideoElements, 500);
