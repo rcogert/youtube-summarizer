@@ -10,10 +10,17 @@ external_node_modules = ["openai", "youtube-transcript-api"]
 [functions.summarize]
 timeout = 26
 
-# 🛑 CRITICAL FINAL FIX: Proxy redirect
-# Routes the clean path /api/summarize to the actual function endpoint.
+# 🛑 CRITICAL FIX: Proxy redirect and CORS headers for the new path
 [[redirects]]
   from = "/api/summarize"
   to = "/.netlify/functions/summarize"
   status = 200 
   force = true # Forces the browser to use this clean path
+
+# Inject CORS headers directly onto the new /api/summarize path
+[[headers]]
+  for = "/api/summarize"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
