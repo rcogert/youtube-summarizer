@@ -1,14 +1,14 @@
 // ==========================================================
 // YOUTUBE TLDR SUMMARIZER - CONTENT SCRIPT
-// V20: FINAL URL CHANGE TO BREAK NETLIFY CACHE
+// V21: Revert to Original URL Structure
 // ==========================================================
 
-// *** CRITICAL CHANGE HERE: Using the NEW proxy path /api/tldr ***
-const API_URL = "https://brilliant-moonbeam-e70394.netlify.app/api/tldr"; 
+// *** CRITICAL CHANGE HERE: Using the ORIGINAL function path ***
+const API_URL = "https://brilliant-moonbeam-e70394.netlify.app/.netlify/functions/summarize"; 
 const BUTTON_CLASS = "tldr-summarizer-button";
 const VIDEO_LINK_SELECTOR = 'a[href*="/watch?v="]'; 
 
-// --- UI AND DISPLAY ---
+// --- UI AND DISPLAY (UNCHANGED) ---
 
 function showSummaryPopup(summary) {
     alert("Summary:\n\n" + summary);
@@ -41,7 +41,6 @@ function createButton(url) {
     return button;
 }
 
-// CRITICAL FIX: The function now takes the hover target separately
 function injectButton(container, videoId, isMainPlayer = false, hoverTarget = null) {
     if (container.querySelector(`.${BUTTON_CLASS}`)) {
         return;
@@ -72,7 +71,7 @@ function injectButton(container, videoId, isMainPlayer = false, hoverTarget = nu
 }
 
 // ------------------------------------------------------
-// 2. NETWORK COMMUNICATION (FINAL URL CHANGE)
+// 2. NETWORK COMMUNICATION
 // ------------------------------------------------------
 function sendForSummary(url) {
   console.log("URL being sent to Netlify:", url); 
@@ -129,24 +128,19 @@ function processVideoElements() {
     const videoLinks = document.querySelectorAll(VIDEO_LINK_SELECTOR);
     
     videoLinks.forEach(link => {
-        // Target the highest-level component wrapper for Home/Search
         const homePageContainer = link.closest('ytd-rich-item-renderer');
-        
-        // Target the image wrapper for Watch Page Sidebar/Related Videos
         const sidebarThumbContainer = link.closest('#thumbnail'); 
         
         let finalContainer = null;
         let videoId = null;
         let hoverTarget = null;
         
-        // 1. Sidebar/Related Videos
         if (sidebarThumbContainer) {
             finalContainer = sidebarThumbContainer;
             hoverTarget = link.closest('ytd-compact-video-renderer') || sidebarThumbContainer;
             videoId = new URLSearchParams(link.search).get('v');
         }
         
-        // 2. Homepage/Search Results
         else if (homePageContainer) {
             finalContainer = link.closest('ytd-thumbnail') || homePageContainer;
             hoverTarget = homePageContainer; 
