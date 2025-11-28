@@ -4,9 +4,8 @@ publish = "."
 
 [functions]
 directory = "netlify/functions"
-node_bundler = "esbuild"
-# Adding dependencies here just in case, for maximum stability
-external_node_modules = ["openai", "youtube-transcript-api", "http", "https"] 
+node_bundler = "zisi" # CRITICAL FIX: Switched from esbuild to zisi
+external_node_modules = ["openai", "youtube-transcript-api"]
 
 [functions.summarize]
 timeout = 26
